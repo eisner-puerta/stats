@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: User Interaction API
+  version: 1.0.0
+paths:
+  /stats:
+    post:
+      summary: Save user interaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInteractionRequest'
+      responses:
+        '201':
+          description: Created
+
+components:
+  schemas:
+    UserInteractionStatsRequest:
+      type: object
+      required:
+        - totalContactoClientes
+        - motivoReclamo
+        - motivoGarantia
+        - motivoDuda
+        - motivoCompra
+        - motivoFelicitaciones
+        - motivoCambio
+        - hash
+      properties:
+        totalContactoClientes:
+          type: integer
+          example: 250
+        motivoReclamo:
+          type: integer
+          example: 25
+        motivoGarantia:
+          type: integer
+          example: 10
+        motivoDuda:
+          type: integer
+          example: 100
+        motivoCompra:
+          type: integer
+          example: 100
+        motivoFelicitaciones:
+          type: integer
+          example: 7
+        motivoCambio:
+          type: integer
+          example: 8
+        hash:
+          type: string
+          example: "02946f262f2eb0d8d5c8e76c50433ed8"

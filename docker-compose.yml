@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+
+  dynamodb-local:
+   command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+   image: "amazon/dynamodb-local:latest"
+   container_name: dynamodb-local
+   ports:
+     - "8000:8000"
+   volumes:
+     - "./docker/dynamodb:/home/dynamodblocal/data"
+   working_dir: /home/dynamodblocal
+
+  rabbitmq-local:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-local
+    ports:
+      - "5672:5672"    # Puerto para comunicación de aplicaciones
+      - "15672:15672"  # Interfaz web de administración
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
