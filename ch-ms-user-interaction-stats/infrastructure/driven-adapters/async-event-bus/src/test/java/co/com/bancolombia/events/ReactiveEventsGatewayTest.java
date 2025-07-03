@@ -1,70 +1,74 @@
 package co.com.bancolombia.events;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cloudevents.CloudEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.core.publisher.Mono;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.api.domain.DomainEventBus;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.cloudevents.CloudEvent;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class ReactiveEventsGatewayTest {
 
     @Mock
     private DomainEventBus domainEventBus;
 
-    @Mock
     private ObjectMapper objectMapper;
 
     private ReactiveEventsGateway gateway;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        objectMapper = new ObjectMapper();
         gateway = new ReactiveEventsGateway(domainEventBus, objectMapper);
-        when(domainEventBus.emit(any(CloudEvent.class))).thenReturn(Mono.empty());
     }
 
     @Test
-    void testEmitLogsEvent() {
-        Object event = new Object() {
-            @Override
-            public String toString() {
-                return "testEvent";
-            }
-        };
+    void emit_shouldSendEventSuccessfully() {
+        // Arrange
+        Object event = Map.of("key", "value");
+        when(domainEventBus.emit(any(CloudEvent.class))).thenReturn(Mono.empty());
 
-        when(objectMapper.valueToTree(event)).thenReturn(mock(ObjectNode.class));
+        // Act & Assert
+        StepVerifier.create(gateway.emit(event))
+                .verifyComplete();
 
-        gateway.emit(event).block();
+        // Verify CloudEvent sent
+        ArgumentCaptor<CloudEvent> captor = ArgumentCaptor.forClass(CloudEvent.class);
+        verify(domainEventBus).emit(captor.capture());
 
-        verify(domainEventBus, times(1)).emit(any(CloudEvent.class));
-    }
-
-   @Test
-    void testEmitConstructsCloudEvent() {
-        Object event = new Object() {
-            public String toString() { return "testEvent"; }
-        };
-
-        when(objectMapper.valueToTree(event)).thenReturn(mock(ObjectNode.class));
-
-        gateway.emit(event).block();
-
-        ArgumentCaptor<CloudEvent> eventCaptor = ArgumentCaptor.forClass(CloudEvent.class);
-        verify(domainEventBus, times(1)).emit(eventCaptor.capture());
-
-        CloudEvent cloudEvent = eventCaptor.getValue();
+        CloudEvent cloudEvent = captor.getValue();
         assertEquals(ReactiveEventsGateway.EVENT_NAME, cloudEvent.getType());
-        assertEquals("https://reactive-commons.org/foos", cloudEvent.getSource().toString());
+        assertEquals("urn:microservice:ch-ms-user-interaction-stats", cloudEvent.getSource().toString());
     }
 
+    @Test
+    void emit_shouldSerializeEventToJson() {
+        // Arrange
+        Map<String, Object> event = Map.of("testField", "testValue");
+        when(domainEventBus.emit(any(CloudEvent.class))).thenReturn(Mono.empty());
 
+        // Act
+        gateway.emit(event).block();
+
+        // Assert JSON serialization worked
+        ArgumentCaptor<CloudEvent> captor = ArgumentCaptor.forClass(CloudEvent.class);
+        verify(domainEventBus).emit(captor.capture());
+
+        CloudEvent cloudEvent = captor.getValue();
+        byte[] data = cloudEvent.getData().toBytes();
+        String json = new String(data);
+        assertEquals("{\"testField\":\"testValue\"}", json);
+    }
 }
