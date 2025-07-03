@@ -4,5 +4,5 @@ import co.com.bancolombia.model.userinteractionstats.userinteractionstats.UserIn
 import reactor.core.publisher.Mono;
 
 public interface UserInteractionStatsGateway {
-    Mono<Void> saveUserInteractionStats(UserInteractionStats userInteractionStats, String timestamp);
+    Mono<Void> saveUserInteractionStats(UserInteractionStats userInteractionStats);
 }

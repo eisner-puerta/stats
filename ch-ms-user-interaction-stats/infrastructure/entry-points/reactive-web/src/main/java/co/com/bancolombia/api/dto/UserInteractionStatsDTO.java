@@ -1,6 +1,5 @@
-package co.com.bancolombia.api.model;
+package co.com.bancolombia.api.dto;
 
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInteractionStatsRequest {
+public class UserInteractionStatsDTO {
     private Integer totalContactoClientes = null;
     private Integer motivoReclamo = null;
     private Integer motivoGarantia = null;
