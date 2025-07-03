@@ -3,6 +3,7 @@ package co.com.bancolombia.usecase.userinteractionstats;
 import co.com.bancolombia.model.events.gateways.EventsGateway;
 import co.com.bancolombia.model.userinteractionstats.gateways.UserInteractionStatsGateway;
 import co.com.bancolombia.model.userinteractionstats.userinteractionstats.UserInteractionStats;
+import co.com.bancolombia.model.validators.HashValidator;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -13,7 +14,10 @@ public class UserInteractionStatsUseCase {
 
     public Mono<Void> saveUserInteractionStats(UserInteractionStats userInteractionStats)
     {
-        return userInteractionStatsGateway.saveUserInteractionStats(userInteractionStats)
-                .then(eventsGateway.emit(userInteractionStats));
+        return Mono.just(userInteractionStats)
+                .filter(HashValidator.isValid::apply)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Hash inválido")))
+                .flatMap(stat -> userInteractionStatsGateway.saveUserInteractionStats(stat)
+                .then(eventsGateway.emit(stat)));
     }
 }
