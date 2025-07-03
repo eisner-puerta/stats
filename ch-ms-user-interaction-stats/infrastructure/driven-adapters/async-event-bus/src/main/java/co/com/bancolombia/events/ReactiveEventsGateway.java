@@ -22,17 +22,18 @@ import static reactor.core.publisher.Mono.from;
 @RequiredArgsConstructor
 @EnableDomainEventBus
 public class ReactiveEventsGateway implements EventsGateway {
-    public static final String SOME_EVENT_NAME = "some.event.name";
+    public static final String EVENT_NAME = EventType.STATS_VALIDATED.getName();
     private final DomainEventBus domainEventBus;
     private final ObjectMapper om;
 
     @Override
     public Mono<Void> emit(Object event) {
-        log.log(Level.INFO, "Sending domain event: {0}: {1}", new String[]{SOME_EVENT_NAME, event.toString()});
+        log.log(Level.INFO, "Sending domain event: {0}: {1}", new String[]{EVENT_NAME, event.toString()});
+
         CloudEvent eventCloudEvent = CloudEventBuilder.v1()
                 .withId(UUID.randomUUID().toString())
-                .withSource(URI.create("https://reactive-commons.org/foos"))
-                .withType(SOME_EVENT_NAME)
+                .withSource(URI.create("urn:microservice:ch-ms-user-interaction-stats"))
+                .withType(EVENT_NAME)
                 .withTime(OffsetDateTime.now())
                 .withData("application/json", JsonCloudEventData.wrap(om.valueToTree(event)))
                 .build();

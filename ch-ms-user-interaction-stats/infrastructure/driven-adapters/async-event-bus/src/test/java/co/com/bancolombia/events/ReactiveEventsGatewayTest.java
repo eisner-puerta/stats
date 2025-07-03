@@ -62,7 +62,7 @@ class ReactiveEventsGatewayTest {
         verify(domainEventBus, times(1)).emit(eventCaptor.capture());
 
         CloudEvent cloudEvent = eventCaptor.getValue();
-        assertEquals(ReactiveEventsGateway.SOME_EVENT_NAME, cloudEvent.getType());
+        assertEquals(ReactiveEventsGateway.EVENT_NAME, cloudEvent.getType());
         assertEquals("https://reactive-commons.org/foos", cloudEvent.getSource().toString());
     }
 

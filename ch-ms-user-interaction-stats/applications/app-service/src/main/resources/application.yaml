@@ -5,6 +5,11 @@ spring:
     name: "ch-ms-user-interaction-stats"
   devtools:
     add-properties: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   h2:
     console:
       enabled: true
